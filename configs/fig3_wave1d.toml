@@ -1,0 +1,28 @@
+# Fig. 3: 1D wave on a periodic ring, Newton sweeps.
+[domain.x]
+start = 0.0
+end = 10.0
+n = 31
+periodic = true
+
+[integrator]
+dt = 0.2
+t_divs = 3
+x_divs = 6
+n_refine = 3
+damping = 0.8
+
+[lagrangian]
+name = "wave"
+c2 = 0.05
+# learned: {name = "model", path = "wave1d_c2_0p05.eqx", width_size = 400}
+
+[init]
+name = "gaussian"
+center = 5.0
+alpha = 2.0
+
+[run]
+n_steps = 50000
+every = 50
+out = "fig3_wave1d.npz"

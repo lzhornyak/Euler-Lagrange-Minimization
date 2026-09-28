@@ -1,0 +1,35 @@
+# Fig. 5a: 1D pulse crossing from c^2 = 1 into c^2 = 0.25, open ends.
+[domain.x]
+start = 0.0
+end = 2.0
+n = 101
+left = "open"
+right = "open"
+
+[integrator]
+dt = 0.01
+t_divs = 3
+x_divs = 6
+n_refine = 5
+damping = 0.8
+position_dependent = true
+
+[lagrangian]
+name = "blend"
+x0 = 1.0
+width = 0.011
+left = {name = "wave", c2 = 1.0}
+right = {name = "wave", c2 = 0.25}
+# learned: left = {name = "model", path = "wave1d_c2_1p00.eqx"}
+#          right = {name = "model", path = "wave1d_c2_0p25.eqx"}
+#          normalize = true
+
+[init]
+name = "gaussian"
+center = 0.0
+alpha = 16.0
+
+[run]
+n_steps = 10000
+every = 10
+out = "fig5a_two_media.npz"

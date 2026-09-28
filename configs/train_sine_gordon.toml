@@ -1,0 +1,19 @@
+# Sine-Gordon density (breather and kink-antikink configs).
+[domain.x]
+start = -10.0
+end = 10.0
+n = 31
+periodic = true
+
+[lagrangian]
+name = "wave"
+c2 = 1.0
+V = "sine_gordon"
+m2 = 1.0
+
+[train]
+width_size = 400
+amp_bound = 2.8
+k_bound = 2.0
+qt_scale = 0.6
+out = "sine_gordon.eqx"

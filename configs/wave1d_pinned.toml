@@ -1,0 +1,27 @@
+# 1D wave: pinned standing mode for the c^2-sweep rollouts (c2 = 0.05, 0.25, 1.0).
+[domain.x]
+start = -1.0
+end = 1.0
+n = 21
+
+[integrator]
+dt = 0.01
+t_divs = 5
+x_divs = 11
+n_refine = 5
+damping = 0.8
+
+[lagrangian]
+name = "wave"
+c2 = 0.05
+# learned: {name = "model", path = "wave1d_c2_0p05.eqx", width_size = 400}
+#   c2 = 0.25 and 1.0: path = "wave1d_c2_0p25.eqx" or "wave1d_c2_1p00.eqx", default width
+
+[init]
+name = "sine_mode"
+k = 1
+
+[run]
+n_steps = 10000
+every = 10
+out = "wave1d_pinned.npz"

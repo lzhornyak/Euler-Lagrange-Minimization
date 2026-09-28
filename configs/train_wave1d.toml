@@ -1,0 +1,16 @@
+# 1D wave density with c^2 = 0.05 (Fig. 3, c^2 sweep).
+[domain.x]
+start = -1.0
+end = 1.0
+n = 21
+
+[lagrangian]
+name = "wave"
+c2 = 0.05
+
+[train]
+width_size = 400
+c = 0.22360679774997896    # sqrt(c2)
+amp_bound = 0.5
+k_bound = 4.0
+out = "wave1d_c2_0p05.eqx"

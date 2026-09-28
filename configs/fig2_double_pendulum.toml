@@ -1,0 +1,25 @@
+# Fig. 2: double pendulum from rest, Newton sweeps in f64.
+x64 = true
+
+[domain]
+n_dof = 2
+
+[integrator]
+dt = 0.02
+t_divs = 2
+n_refine = 3
+damping = 1.0
+
+[lagrangian]
+name = "double_pendulum"
+# learned: {name = "model", path = "dpendulum_structured.eqx", arch = "structured", n_dof = 2}
+
+[init]
+name = "state"
+q = [1.3463968515384828, 2.356194490192345]    # [3 pi/7, 3 pi/4]
+qt = [0.0, 0.0]
+
+[run]
+n_steps = 5000000
+every = 500
+out = "fig2_double_pendulum.npz"

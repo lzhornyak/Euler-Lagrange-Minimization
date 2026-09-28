@@ -1,0 +1,42 @@
+# Fig. 5b: 2D wave driven from the left face through a double slit, absorbing Mur faces.
+[domain.x]
+start = 0.0
+end = 10.0
+n = 201
+left = {type = "driven", amplitude = 0.25, omega = 12.566370614359172}    # omega = 4 pi
+right = {type = "mur", c = 1.0}
+
+[domain.y]
+start = -2.0
+end = 10.0
+n = 241
+left = {type = "mur", c = 1.0}
+right = {type = "mur", c = 1.0}
+
+[integrator]
+dt = 0.015
+t_divs = 3
+x_divs = 5
+y_divs = 5
+n_refine = 20
+damping = 0.5
+sequential = true
+
+[lagrangian]
+name = "wave"
+c2 = 1.0
+# learned: {name = "model", path = "wave2d_c2_1p00.eqx", width_size = 40, depth = 2, in_size = 4}
+
+[init]
+name = "zeros"
+
+[run]
+n_steps = 1200
+every = 20
+out = "fig5b_double_slit.npz"
+
+[run.barrier]
+x = 2.0
+slits = [2.5, 5.5]
+half_width = 0.15
+thick = 3

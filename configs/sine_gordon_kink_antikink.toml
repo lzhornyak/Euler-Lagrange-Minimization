@@ -1,0 +1,30 @@
+# Sine-Gordon kink-antikink collision on a periodic line.
+[domain.x]
+start = -10.0
+end = 10.0
+n = 31
+periodic = true
+
+[integrator]
+dt = 0.12903225806451613    # 0.2 dx = 4/31
+t_divs = 3
+x_divs = 6
+n_refine = 3
+damping = 0.8
+
+[lagrangian]
+name = "wave"
+c2 = 1.0
+V = "sine_gordon"
+m2 = 1.0
+# learned: {name = "model", path = "sine_gordon.eqx", width_size = 400}
+
+[init]
+name = "kink_antikink"
+v = 0.25
+s0 = -10.0
+
+[run]
+n_steps = 155
+every = 1
+out = "sine_gordon_kink_antikink.npz"

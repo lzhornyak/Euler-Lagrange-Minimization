@@ -1,0 +1,29 @@
+# Fig. 3 with the square collocation root solver.
+[domain.x]
+start = 0.0
+end = 10.0
+n = 31
+periodic = true
+
+[integrator]
+dt = 0.2
+t_divs = 2
+x_divs = 2
+n_refine = 1        # learned: 2
+damping = 1.0
+solver = "root"
+
+[lagrangian]
+name = "wave"
+c2 = 0.05
+# learned: {name = "model", path = "wave1d_c2_0p05.eqx", width_size = 400}
+
+[init]
+name = "gaussian"
+center = 5.0
+alpha = 2.0
+
+[run]
+n_steps = 50000
+every = 50
+out = "fig3_wave1d_root.npz"

@@ -1,0 +1,29 @@
+# Klein-Gordon: a Gaussian bump on a periodic line.
+[domain.x]
+start = -10.0
+end = 10.0
+n = 31
+periodic = true
+
+[integrator]
+dt = 0.12903225806451613    # 0.2 dx = 4/31
+t_divs = 3
+x_divs = 6
+n_refine = 3
+damping = 0.8
+
+[lagrangian]
+name = "wave"
+c2 = 1.0
+V = "klein_gordon"
+m2 = 1.0
+
+[init]
+name = "gaussian"
+center = 0.0
+alpha = 1.0
+
+[run]
+n_steps = 7750
+every = 10
+out = "klein_gordon.npz"

@@ -1,0 +1,22 @@
+# 2D wave density with c^2 = 1 (Fig. 4 and 5b).
+[domain.x]
+start = -1.0
+end = 1.0
+n = 7
+
+[domain.y]
+start = -1.0
+end = 1.0
+n = 7
+
+[lagrangian]
+name = "wave"
+c2 = 1.0
+
+[train]
+width_size = 40
+depth = 2
+n_points = 10000
+amp_bound = 1.0
+n_steps = 100000
+out = "wave2d_c2_1p00.eqx"

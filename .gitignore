@@ -1,0 +1,5 @@
+__pycache__/
+.pixi/
+*.npz
+*.eqx
+.pytest_cache/

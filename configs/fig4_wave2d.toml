@@ -1,0 +1,33 @@
+# Fig. 4: 2D wave in a pinned box, Newton sweeps.
+[domain.x]
+start = -1.0
+end = 1.0
+n = 31
+
+[domain.y]
+start = -1.0
+end = 1.0
+n = 31
+
+[integrator]
+dt = 0.02
+t_divs = 3
+x_divs = 5
+y_divs = 5
+n_refine = 20
+damping = 0.5
+
+[lagrangian]
+name = "wave"
+c2 = 1.0
+# learned: {name = "model", path = "wave2d_c2_1p00.eqx", width_size = 40, depth = 2, in_size = 4}
+
+[init]
+name = "gaussian"
+center = [0.0, 0.0]
+alpha = 25.0
+
+[run]
+n_steps = 50000
+every = 5
+out = "fig4_wave2d.npz"
