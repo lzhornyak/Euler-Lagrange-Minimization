@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Learned Lagrangian Models of PDEs via Euler–Lagrange Residual Minimization (NeurIPS 2026).">
+<title>Euler–Lagrange Minimization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=Roboto+Mono:wght@500&display=swap">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+    svg: { fontCache: "global" },
+    options: { enableMenu: false }
+  };
+</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+<style>
+  /* Layout: one reading column, figures on white plates so the paper's plots
+     read the same in both themes. Penn navy + red from the poster and slides. */
+  :root {
+    --bg: #fbfcfd;
+    --fg: #1c2230;
+    --muted: #5a6273;
+    --rule: #dde2ea;
+    --navy: #011f5b;
+    --red: #95001a;
+    --link: #1f4fa0;
+    --plate: #ffffff;
+    --plate-edge: #e3e7ee;
+    --code-bg: #f1f3f7;
+    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+    --sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e131d; --fg: #e4e8ef; --muted: #a2abbb; --rule: #2a3242;
+      --navy: #9dbbe8; --red: #e58792; --link: #9dbbe8;
+      --plate: #ffffff; --plate-edge: #2a3242; --code-bg: #161d2a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e131d; --fg: #e4e8ef; --muted: #a2abbb; --rule: #2a3242;
+    --navy: #9dbbe8; --red: #e58792; --link: #9dbbe8;
+    --plate: #ffffff; --plate-edge: #2a3242; --code-bg: #161d2a;
+    color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--fg); font: 400 1.075rem/1.62 var(--sans); }
+  .wrap {
+    max-width: 54rem; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 4rem;
+  }
+  a { color: var(--link); text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible, video:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; line-height: 1.2; }
+  h2 { color: var(--navy); font-size: 1.6rem; margin: 3.2rem 0 0.8rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--rule); }
+  h3 { font-size: 1.22rem; margin: 2.2rem 0 0.5rem; }
+  p { margin: 0 0 1rem; }
+
+  /* header */
+  header { text-align: center; padding-block: 3rem 1.4rem; }
+  .eyebrow { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); margin: 0 0 1rem; }
+  h1 { font-size: clamp(1.7rem, 4.2vw, 2.55rem); color: var(--navy); margin: 0 auto 1.1rem; max-width: 22em; }
+  .authors { font-size: 1.15rem; margin: 0 0 0.25rem; }
+  .authors sup, .affil sup { font-size: 0.7em; color: var(--muted); }
+  .affil { color: var(--muted); font-size: 0.98rem; margin: 0 auto; max-width: none; }
+  .links { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1.4rem; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 1.05rem;
+    border-radius: 999px; font: 600 0.95rem/1 var(--sans); text-decoration: none;
+    background: var(--navy); color: var(--bg); border: 1px solid var(--navy);
+  }
+  .btn svg { width: 1em; height: 1em; fill: currentColor; }
+  .bar { height: 6px; margin-top: 2rem; background: linear-gradient(90deg, #82afd3 0 56.55%, #57000a 56.55% 84.94%, #95001a 84.94% 100%); }
+
+  .lead { font-family: var(--serif); font-size: 1.2rem; line-height: 1.5; text-align: center; margin: 0 auto 1rem; max-width: 40em; }
+
+  /* media */
+  figure { margin: 1.6rem 0 1.8rem; }
+  .plate { background: var(--plate); border: 1px solid var(--plate-edge); border-radius: 6px; padding: 0.6rem; }
+  .plate img, .plate video { display: block; width: 100%; height: auto; max-width: 100%; border-radius: 3px; }
+  .plate.svg { padding: 1rem; }
+  .plate video { cursor: pointer; }
+  @media (max-width: 560px) { .plate, .plate.svg { padding: 0.25rem; } }
+  figcaption { font-size: 0.93rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; }
+  figcaption b { color: var(--fg); font-weight: 600; }
+  .pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .pair > * { min-width: 0; }
+
+  .eq { overflow-x: auto; margin: 0.4rem 0 1.2rem; }
+  .scales { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem; margin-top: 1.2rem; }
+  .scale { min-width: 0; display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 1.4rem; align-items: start; }
+  .scale > * { min-width: 0; }
+  .scale figure { margin: 0.2rem 0 0; }
+  .scale figcaption { text-align: center; margin-top: 0.4rem; }
+  @media (max-width: 640px) { .scale { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; } .scale figure { width: min(100%, 15rem); margin: 0 auto; } }
+  .scale h3 { margin: 0 0 0.3rem; display: flex; gap: 0.6rem; align-items: baseline; }
+  .scale h3 span { font: 500 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
+  .key {
+    margin: 1.6rem 0; padding: 1rem 1.2rem; border: 1px solid var(--rule); border-radius: 6px;
+    font-family: var(--serif); font-size: 1.12rem; line-height: 1.5;
+  }
+  .key p { margin: 0; max-width: none; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .stat { border-top: 2px solid var(--navy); padding-top: 0.5rem; }
+  .stat b { display: block; font: 600 1.9rem/1.1 var(--serif); color: var(--navy); font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 0.9rem; color: var(--muted); }
+  @media (max-width: 560px) { .stats { grid-template-columns: 1fr; } }
+
+  .bib { position: relative; }
+  pre { background: var(--code-bg); border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.1rem; overflow-x: auto; font: 0.86rem/1.55 var(--mono); margin: 0; }
+  .copy { position: absolute; top: 0.5rem; right: 0.5rem; font: 600 0.8rem/1 var(--sans); padding: 0.4rem 0.7rem; border-radius: 4px; border: 1px solid var(--rule); background: var(--bg); color: var(--fg); cursor: pointer; }
+  footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: 0.9rem; color: var(--muted); }
+  footer p { max-width: none; }
+  mjx-container[display="true"] { margin: 0.6rem 0 !important; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+
+</style>
+<style>body { margin: 0; }</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">NeurIPS 2026 · Spotlight</p>
+    <h1>Learned Lagrangian Models of PDEs via Euler–Lagrange Residual Minimization</h1>
+    <p class="authors">Lyra Zhornyak<sup>1</sup>, Eric Forgoston<sup>2</sup>, M. Ani Hsieh<sup>1</sup></p>
+    <p class="affil"><sup>1</sup>University of Pennsylvania &nbsp;·&nbsp; <sup>2</sup>Montclair State University</p>
+    <div class="links">
+      <a class="btn" href="https://arxiv.org/abs/2605.07157">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1h6l3 3v11H4zM9.5 1.8V4.5h2.7zM5.5 8h5v1h-5zm0 2h5v1h-5zm0 2h3.5v1H5.5z"/></svg>
+        Paper (arXiv)
+      </a>
+      <a class="btn" href="https://github.com/lzhornyak/Euler-Lagrange-Minimization">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0z"/></svg>
+        Code
+      </a>
+      <a class="btn" href="#bibtex">BibTeX</a>
+    </div>
+    <div class="bar" role="presentation"></div>
+  </header>
+
+  <figure>
+    <div class="plate">
+      <video src="media/wave2d.mp4" poster="media/wave2d_poster.jpg" autoplay muted loop playsinline preload="metadata" tabindex="0" title="Click to pause or play" aria-label="2D wave over 1000 seconds: exact solution, PDE-Refiner, FNO and ELM side by side"></video>
+    </div>
+    <figcaption><b>A learned density simulates a 2D wave for 1,000 s.</b> Existing methods break down within a tenth of that time.</figcaption>
+  </figure>
+
+  <p class="lead">The first variational integrator approach for learning and simulating PDEs with continuous Lagrangians, producing stable, long-horizon predictions from small neural models of physics primitives.</p>
+
+  <h2 id="motivation">Forecasting needs stable iteration</h2>
+  <p>Modern learned models capture the underlying physics with increasing accuracy. Yet most of the focus has been on producing better next-frame predictions, with strikingly little attention paid to how these models are <em>used</em> for tasks where forward integration plays a central role, e.g., forward simulation, prediction and forecasting, estimation and filtering.</p>
+  <p>This oversight matters because forecasting a system's behavior places different demands on the learned model than finding a solution does. While these two uses are closely related — knowing how to produce a good local solution does help forecasting — their objectives are distinct: <em>solving</em> demands local accuracy and sensitivity to the equations, while <em>forecasting</em> demands stability and bounded long-term error. For systems that conserve energy (waves, vibrations, orbits, etc.), this distinction is particularly important as even small per-step errors compound over long simulations, eventually producing solutions that violate conservation laws and become physically meaningless.</p>
+
+  <figure>
+    <div class="plate svg">
+      <svg viewBox="0 0 760 200" role="img" aria-label="Autoregressive rollout: the state u(t) goes into a neural network, which outputs u(t + Δt) plus an error ε; the output, error included, is fed back as the next input." style="width:100%;height:auto;display:block">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#2d2926"/></marker>
+          <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#95001a"/></marker>
+        </defs>
+        <rect x="40" y="40" width="150" height="70" fill="#ffffff" stroke="#011f5b" stroke-width="2.5"/>
+        <text x="115" y="83" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="24" fill="#1c2230">u(t)</text>
+        <line x1="190" y1="75" x2="272" y2="75" stroke="#2d2926" stroke-width="2.5" marker-end="url(#ah)"/>
+        <rect x="275" y="25" width="200" height="100" fill="#011f5b"/>
+        <text x="375" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#ffffff">neural</text>
+        <text x="375" y="97" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#ffffff">network</text>
+        <line x1="475" y1="75" x2="547" y2="75" stroke="#2d2926" stroke-width="2.5" marker-end="url(#ah)"/>
+        <rect x="550" y="40" width="190" height="70" fill="#ffffff" stroke="#011f5b" stroke-width="2.5"/>
+        <text x="645" y="83" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#1c2230"><tspan font-style="italic">u</tspan>(<tspan font-style="italic">t</tspan> + Δ<tspan font-style="italic">t</tspan>) + <tspan fill="#95001a" font-style="italic">ε</tspan></text>
+        <path d="M645 112 C 600 190, 170 190, 117 116" fill="none" stroke="#95001a" stroke-width="2.5" marker-end="url(#ahr)"/>
+        <text x="380" y="192" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#95001a"><tspan font-style="italic">ε</tspan> is unconstrained and re-enters the next step</text>
+      </svg>
+    </div>
+    <figcaption>The usual pipeline treats dynamics as regression: predict the next state, feed it back in, repeat.</figcaption>
+  </figure>
+
+  <p>Existing work has predominantly focused on producing better and better models of the dynamics, implicitly assuming that forecasting errors can be overcome by either more training or specialized architectures. This assumption fails most severely for chaotic systems and systems defined by partial differential equations (PDEs). Accumulated errors can violate the structure of the system, pushing a trajectory outside of the stable, learned regime, thereby causing a catastrophic failure in the prediction. Classical numerical analysis has long known that preserving structure can matter as much as per-step accuracy. For Hamiltonian and Lagrangian systems, symplectic integrators trade local fidelity for energy conservation and long-term stability. Despite this, most learned-physics methods treat the integrator as an implementation detail.</p>
+
+  <h2 id="method">The Technical Details</h2>
+  <p>Conceptually, Euler–Lagrange Minimization (ELM) separates <em>what</em> a system's physics are (the Lagrangian density) from <em>how</em> to simulate them (the variational integrator). Given a learned Lagrangian density \(\mathcal{L}\), we want to find the path \(q\) such that the action</p>
+  <div class="eq">\[ S[q] = \int_X \mathcal{L}\big(q, q_t, q_x\big)\,\mathrm{d}X \]</div>
+  <p>is stationary. As an example, for the 1D wave equation, \(\mathcal{L}(q, q_t, q_x) = \tfrac{1}{2}\mu\, q_t^2 - \tfrac{1}{2}c^2 q_x^2\). ELM is a minimization-based integrator designed for learned models, constructed at three scales. A local, pointwise residual measuring the deviation from the learned dynamics defines the error induced by a path approximated from a finite set of nodes. Starting from an initial guess, a damped Newton solve swept via Jacobi iteration across overlapping patches advances the global state without a coupled solve.</p>
+
+  <div class="scales">
+    <div class="scale">
+      <figure>
+        <div class="plate"><img src="media/scale_local.png" alt="A small neural network: three inputs, two hidden layers, one output"></div>
+        <figcaption>\((q, q_t, q_x) \to\) network \(\to \mathcal{L}\)</figcaption>
+      </figure>
+      <div>
+      <h3><span>Local</span>Euler–Lagrange residual</h3>
+      <div class="eq">\[ R[q \mid (t,x)] \equiv \frac{\partial\mathcal{L}}{\partial q} - \frac{\mathrm{d}}{\mathrm{d}t} \frac{\partial\mathcal{L}}{\partial q_t} - \frac{\mathrm{d}}{\mathrm{d}x} \frac{\partial\mathcal{L}}{\partial q_x} \]</div>
+      <p>\(R=0\) is the Euler–Lagrange equation. Given an approximate path \(\hat{q}\), the squared Euler–Lagrange residual \(R^2[\hat{q} \mid (t,x)]\) is a measure of the deviation from the dynamics represented by \(\mathcal{L}\).</p>
+      </div>
+    </div>
+    <div class="scale">
+      <figure>
+        <div class="plate"><img src="media/scale_patch.png" alt="One patch: three known nodes at the current time, three unknown nodes at the next time, four sample points inside the shaded cell, faded neighbouring nodes on either side"></div>
+        <figcaption>● known · ○ unknown · × sample points</figcaption>
+      </figure>
+      <div>
+      <h3><span>Patch</span>Hermite interpolation and patch error</h3>
+      <div class="eq">\[ J(\mathcal{Q}, \mathcal{X}) \equiv \iint_{\mathrm{Conv}(\mathcal{X})} R^2[\hat{q} \mid (t,x)]\,\mathrm{d}t\,\mathrm{d}x \approx \sum_{i=1}^{n_\omega} \omega_i R^2\big[\hat{q} \mid (\tilde t_i, \tilde x_i)\big] \]</div>
+      <p>For a set of \(4m\) functions \(\mathcal{F}\), we construct a Hermite interpolation \(\hat{q}\) by fitting \(\mathcal{F}\) to this patch. We define the residual accumulated by this interpolation as the patch error, where \(\mathrm{Conv}(\mathcal{X})\) is the convex hull of \(\mathcal{X}\), from which we select \(n_\omega\) points \((\tilde t, \tilde x)\) and associated weights \(\omega\).</p>
+      </div>
+    </div>
+    <div class="scale">
+      <figure>
+        <div class="plate"><img src="media/scale_global.png" alt="A row of seven nodes advanced one time step together, covered by overlapping shaded patches; an arrow points forward in time"></div>
+        <figcaption>Overlapping patches; arrow is one time step</figcaption>
+      </figure>
+      <div>
+      <h3><span>Global</span>Damped Newton sweeps</h3>
+      <div class="eq">\[ \gamma^{(k+1)} = \gamma^{(k)} - \lambda \big(\nabla^2_\gamma J(\gamma^{(k)})\big)^{-1} \nabla_\gamma J(\gamma^{(k)}) \]</div>
+      <p>To advance the solution by one time step, we seek the node \(\gamma\) at a new coordinate \(\eta\) that minimizes the patch error given the known states. By minimizing the residual locally on overlapping patches, we bypass the global implicit solve inherent to fixed discretizations. Our method scales linearly with domain size via Jacobi iteration.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Structure and symplecticity</h3>
+  <p>Unlike classical discrete methods that advance \(q \in Q\), ELM advances a state \((q, q_t)\) on the tangent bundle \(TQ\). From this state, the momentum is given by \(p = \partial\mathcal{L}/\partial q_t\) and the differential of the discrete action can be expressed as</p>
+  <div class="eq">\[ \mathrm{d}S_d = p(t_1)\,\mathrm{d}q(t_1) - p(t_0)\,\mathrm{d}q(t_0) + \sum_{i=1}^{n_\omega} \omega_i\, R[\hat{q} \mid \tilde t_i]\,\mathrm{d}\hat{q}(\tilde t_i) + \mathcal{O}(\Delta t^{2n_\omega + 1}). \]</div>
+  <p>When the Newton iteration converges such that \(J = 0\), \(R = 0\) at each Gauss–Legendre quadrature point and the update can be represented by a type-1 generating function to within quadrature error. For Lagrangians with a constant mass matrix, \(\mathcal{L} = \tfrac12 q_t^\top M q_t - V(q)\), the quadrature error vanishes exactly to result in a symplectic method. For PDE systems in this work, we oversample the quadrature, trading exact symplecticity for the stability of the patch solver.</p>
+
+  <h2 id="results">We learn models that remain stable and conservative</h2>
+  <p>Since <em>every</em> well-conditioned learned Lagrangian is a valid Lagrangian and represents some dynamics, the error in the learned model can only contribute to phase error while all energy drift is attributable to the integrator.</p>
+
+  <h3 id="double-pendulum">Chaotic double pendulum, 100,000 s</h3>
+  <p>We compare ELM against four standard integrators with the same underlying learned model of the system. The non-symplectic methods (the classical Runge–Kutta (RK4) and Dormand–Prince) result in continual and steady energy accumulation. In contrast, symplectic methods conserve a discrete Hamiltonian, so while they do oscillate, they remain bounded over long time-scales. ELM matches the fourth-order Gauss–Legendre Runge–Kutta method (GLRK) since ELM is also a fourth-order method.</p>
+  <figure>
+    <div class="plate"><img src="media/dp_energy.png" alt="Relative energy error over 100,000 s on log-log axes: RK4 and Dormand–Prince grow steadily to 77% and 17%; implicit midpoint reaches a few percent; GLRK-4 and ELM stay bounded below 0.1%."></div>
+  </figure>
+
+  <h3 id="wave-1d">1D wave equation, 10,000 s</h3>
+  <p>We compare the LNN wave model against ELM on a 1D wave equation, both using learned Lagrangians with equivalent architectures. LNN learns on a fixed discretization while ELM learns the continuous Lagrangian density. Even at the coarsest settings, ELM maintains discernible and symmetric wavefronts.</p>
+  <figure>
+    <div class="plate">
+      <video src="media/wave1d.mp4" poster="media/wave1d_poster.jpg" autoplay muted loop playsinline preload="metadata" tabindex="0" title="Click to pause or play" aria-label="1D wave profiles for LNN and ELM against the exact solution at the start, around 1000 s and near 10,000 s"></video>
+    </div>
+  </figure>
+  <p>ELM shows several orders of magnitude improvement in energy conservation, improving with smaller step size, while LNN sees diminishing returns.</p>
+  <figure>
+    <div class="plate"><img src="media/wave1d_energy.png" alt="Relative energy error over 224 periods: both LNN step sizes grow past 100%; ELM at n = 21, 31 and 51 stays below 22%, 5% and 2%."></div>
+  </figure>
+
+  <h3 id="wave-2d">2D wave equation, 1,000 s</h3>
+  <div class="pair narrow-first">
+    <figure>
+      <div class="plate"><img src="media/wave2d_energy.png" alt="Relative energy error over 1000 s: FNO leaves the plot within about 11 s and diverges at 22 s, PDE-Refiner saturates near 300%, ELM stays between about 1% and 20%."></div>
+    </figure>
+    <div>
+      <p>ELM tracks the ground truth with only minor phase drift and energy loss, while both FNO and PDE-Refiner drift within the first 20 s. While PDE-Refiner fails more gracefully than FNO, it still falls into a non-physical global oscillation. ELM achieves better overall accuracy and energy conservation with 78,000 times fewer model parameters than PDE-Refiner.</p>
+      <p>To the best of our knowledge, this is the first work to simulate a PDE with two spatial dimensions using a learned Lagrangian density over long time-horizons. The rollout is shown in the video at the top of the page.</p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>19%</b><span>ELM energy error at 1,000 s</span></div>
+    <div class="stat"><b>271%</b><span>PDE-Refiner energy error at 1,000 s</span></div>
+    <div class="stat"><b>78,000×</b><span>fewer parameters than PDE-Refiner</span></div>
+  </div>
+
+  <h2 id="transfer">One trained model transfers to new domains</h2>
+  <p>Since learned continuous Lagrangians are pointwise, models compose and transfer to new domains without retraining.</p>
+
+  <h3 id="impedance">Impedance interface (1D)</h3>
+  <p>Suppose we have two learned Lagrangians independently trained on separate homogeneous media with different wave speeds and we want to explore what happens when they are joined. Here, we represent the transition as a sharp sigmoid blend between the two Lagrangians at \(x = 1\). The wave partially reflects and partially transmits at the interface, exactly as waves behave when they hit an impedance barrier.</p>
+  <div class="eq">\[ \mathcal{L}(x) = \big(1 - \sigma(x)\big)\,\mathcal{L}_1 + \sigma(x)\,\mathcal{L}_2 \]</div>
+  <figure>
+    <div class="plate">
+      <video src="media/impedance.mp4" poster="media/impedance_poster.jpg" autoplay muted loop playsinline preload="metadata" tabindex="0" title="Click to pause or play" aria-label="A pulse travels through two media and splits at the interface at x = 1 into a reflected and a transmitted wave"></video>
+    </div>
+  </figure>
+
+  <h3 id="double-slit">Double slit (2D)</h3>
+  <p>The same flexibility extends to 2D. A driven wave hits a barrier with two slits, producing interference fringes. This uses the identical model from the 2D wave; barriers, slits, and driven boundaries are enforced purely through constraints on the degrees of freedom.</p>
+  <figure>
+    <div class="plate">
+      <video src="media/double_slit.mp4" poster="media/double_slit_poster.jpg" autoplay muted loop playsinline preload="metadata" tabindex="0" title="Click to pause or play" aria-label="Plane waves from the driven left edge pass through two slits in a wall and interfere on the right"></video>
+    </div>
+  </figure>
+  <p>The operator baselines have no comparable method for transferring to this domain.</p>
+
+  <h2 id="ongoing">Ongoing work: a faster symplectic step</h2>
+  <div>
+    <p>With a small modification to the method, we can formally prove symplecticity for the class of PDEs we examine. Using the same frozen models on the same hardware, the modified step runs faster per step, and the 2D energy error stays flat instead of growing. More details will be available in upcoming work.</p>
+    <div class="stats">
+      <div class="stat"><b>20.6×</b><span>faster per step on the 2D wave (968 → 47 ms)</span></div>
+      <div class="stat"><b>5.5–6.4×</b><span>faster per step on the 1D wave</span></div>
+      <div class="stat"><b>0.058%</b><span>max 2D energy error over 1,000 s</span></div>
+    </div>
+  </div>
+  <figure>
+    <div class="plate"><img src="media/step_compare.png" alt="2D wave relative energy error over 1000 s: published ELM rises to about 20%, modified ELM stays flat near 0.03%; PDE-Refiner saturates near 300% and FNO diverges."></div>
+  </figure>
+
+  <h2 id="conclusion">The Takeaway</h2>
+  <p>A learned continuous Lagrangian with local minimization can compose and transfer across domains without retraining, acting as a physics primitive. Operator-based methods, which fuse dynamics with discretization, cannot transfer this way.</p>
+  <p>We argue that the integrator deserves the same care as the model to achieve flexible physics-learning systems. ELM offers a starting point for learned models that can be deployed, constrained, and combined at inference time rather than retrained per scenario.</p>
+
+  <h2 id="bibtex">BibTeX</h2>
+  <div class="bib">
+    <pre id="bib-text">@inproceedings{zhornyak2026elm,
+  title     = {Learned Lagrangian Models of {PDEs} via
+               {Euler--Lagrange} Residual Minimization},
+  author    = {Zhornyak, Lyra and Forgoston, Eric and Hsieh, M. Ani},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2026}
+}</pre>
+    <button class="copy" id="copy-bib" type="button">Copy</button>
+  </div>
+
+  <footer>
+    <p>Contact: <span style="user-select:all">zhornyak@engineering.upenn.edu</span></p>
+  </footer>
+</div>
+
+<script>
+  // Respect reduced motion: show posters, let the viewer press play.
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll("video[autoplay]").forEach(function (v) {
+      v.removeAttribute("autoplay"); v.pause();
+    });
+  }
+  document.querySelectorAll(".plate video").forEach(function (v) {
+    function toggle() { if (v.paused) v.play(); else v.pause(); }
+    v.addEventListener("click", toggle);
+    v.addEventListener("keydown", function (e) {
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); }
+    });
+  });
+  document.getElementById("copy-bib").addEventListener("click", function () {
+    var btn = this, text = document.getElementById("bib-text").textContent;
+    function selectIt() {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById("bib-text"));
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected";
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { btn.textContent = "Copied"; }, selectIt);
+    } catch (e) { selectIt(); }
+  });
+</script>
+</body>
+</html>

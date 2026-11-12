@@ -5,6 +5,8 @@ Variational integrators for ODEs and PDEs given by a (learned or analytic) Lagra
 space-time cells to zero with damped Newton sweeps (`solver="newton"`), or solves the square
 collocation system directly (`solver="root"`). Built on JAX and Equinox.
 
+Project page: https://lzhornyak.github.io/Euler-Lagrange-Minimization/ (source in `docs/`).
+
 ## Install
 
 ```bash
