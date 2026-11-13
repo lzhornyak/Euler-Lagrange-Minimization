@@ -17,9 +17,10 @@
 </script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
 <style>
-  /* Layout: one reading column, figures on white plates so the paper's plots
-     read the same in both themes. Penn navy + red from the poster and slides. */
+  /* Layout: one reading column, figures on white plates. Light theme only.
+     Penn navy + red from the poster and slides. */
   :root {
+    color-scheme: light;
     --bg: #fbfcfd;
     --fg: #1c2230;
     --muted: #5a6273;
@@ -33,20 +34,6 @@
     --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
     --sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
     --mono: "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0e131d; --fg: #e4e8ef; --muted: #a2abbb; --rule: #2a3242;
-      --navy: #9dbbe8; --red: #e58792; --link: #9dbbe8;
-      --plate: #ffffff; --plate-edge: #2a3242; --code-bg: #161d2a;
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #0e131d; --fg: #e4e8ef; --muted: #a2abbb; --rule: #2a3242;
-    --navy: #9dbbe8; --red: #e58792; --link: #9dbbe8;
-    --plate: #ffffff; --plate-edge: #2a3242; --code-bg: #161d2a;
-    color-scheme: dark;
   }
 
   body { background: var(--bg); color: var(--fg); font: 400 1.075rem/1.62 var(--sans); }
